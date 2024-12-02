@@ -1,16 +1,8 @@
 object d1p1 extends Solution[Int]:
   case class LocationIdLists(left: List[Int], right: List[Int]):
-    def sorted: LocationIdLists =
-      LocationIdLists(left.sortWith(_ - _ < 0), right.sortWith(_ - _ < 0))
-
-    def deltas: List[Int] =
-      left.zip(right).map(Math.abs(_ - _))
-
-    def simScore: Int =
-      left.map(item => right.count(_ == item) * item).sum
-
-    override def toString(): String =
-      left.mkString("\n") + "=" * 20 + right.mkString("\n")
+    def sorted: LocationIdLists = LocationIdLists(left.sortWith(_ - _ < 0), right.sortWith(_ - _ < 0))
+    def deltas: List[Int]       = left.zip(right).map((l, r) => Math.abs(l - r))
+    def simScore: Int           = left.map(item => right.count(_ == item) * item).sum
 
   object LocationIdLists:
     val empty = LocationIdLists(List.empty, List.empty)
