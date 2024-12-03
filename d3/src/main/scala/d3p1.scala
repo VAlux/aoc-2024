@@ -1,4 +1,5 @@
 import scala.util.chaining.*
+import scala.annotation.tailrec
 
 object d3p1 extends Solution[Int]:
   val mulRegex = s"mul\\(\\d+,\\d+\\)|do\\(\\)|don't\\(\\)".r
@@ -21,6 +22,7 @@ object d3p1 extends Solution[Int]:
         val operands = input.substring(input.indexOf("(") + 1, input.indexOf(")")).split(",").toList
         Instruction(Operation.MUL, operands)
 
+  @tailrec
   def interpret(instructions: List[Instruction], acc: Int = 0): Int =
     if instructions.isEmpty then acc
     else

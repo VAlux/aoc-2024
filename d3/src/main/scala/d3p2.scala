@@ -1,7 +1,9 @@
+import scala.annotation.tailrec
 import scala.util.chaining.*
 import d3p1.*
 
 object d3p2 extends Solution[Int]:
+  @tailrec
   def interpret(instructions: List[Instruction], enabled: Boolean = true, acc: Int = 0): Int =
     if instructions.isEmpty then acc
     else
