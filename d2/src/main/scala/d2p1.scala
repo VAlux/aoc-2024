@@ -1,12 +1,38 @@
+import java.nio.file.DirectoryStream
+
 object d2p1 extends Solution[Int]:
-  case class ReportSafetyIndicator(monotonic: Boolean, safeDelta: Boolean):
-    def and(monotonic: Boolean, safeDelta: Boolean): ReportSafetyIndicator =
-      ReportSafetyIndicator(this.monotonic && monotonic, this.safeDelta && safeDelta)
+  enum Direction:
+    case UP
+    case DOWN
+    case NOWHERE
+
+  object Direction:
+    def fromDelta(delta: Int): Direction =
+      if delta < 0 then Direction.DOWN else Direction.UP
+
+  case class ReportSafetyIndicator(direction: Direction, monotonic: Boolean, safeDelta: Boolean):
+    def ingestSignalChunk(chunk: List[Int]): ReportSafetyIndicator =
+      val delta = chunk match
+        case a :: b :: Nil => a - b
+        case _             => 0
+
+      val absDelta = delta.abs
+      this.and(Direction.fromDelta(delta), absDelta >= 1 && absDelta <= 3)
+
+    def and(currentDirection: Direction, safeDelta: Boolean): ReportSafetyIndicator =
+      ReportSafetyIndicator(
+        currentDirection,
+        ReportSafetyIndicator.isMonotonicDirection(this, currentDirection),
+        this.safeDelta && safeDelta
+      )
 
     def isSafe = this.monotonic && this.safeDelta
 
   object ReportSafetyIndicator:
-    val safe = ReportSafetyIndicator(true, true)
+    def isMonotonicDirection(indicator: ReportSafetyIndicator, direction: Direction): Boolean =
+      indicator.direction == Direction.NOWHERE || (indicator.monotonic && (indicator.direction == direction))
+
+    val safe = ReportSafetyIndicator(Direction.NOWHERE, true, true)
 
   def parseReports(input: List[String]): List[List[Int]] =
     def parseReport(report: String): List[Int] = report.split(" ").map(_.toInt).toList
@@ -15,15 +41,8 @@ object d2p1 extends Solution[Int]:
   def isSafe(report: List[Int]): Boolean =
     report
       .sliding(2, 1)
-      .foldLeft(ReportSafetyIndicator.safe) { (acc, current) =>
-        val delta = current match
-          case a :: b :: Nil => Math.abs(a - b)
-          case _             => 0
-
-        acc.and(delta >= 1 && delta <= 3, true)
-      }
+      .foldLeft(ReportSafetyIndicator.safe)((indicator, chunk) => indicator.ingestSignalChunk(chunk))
       .isSafe
 
   override def solve(input: List[String]): Int =
-    val reports = parseReports(input)
-    0
+    parseReports(input).count(isSafe)
