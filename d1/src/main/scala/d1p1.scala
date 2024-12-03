@@ -1,7 +1,7 @@
 object d1p1 extends Solution[Int]:
   case class LocationIdLists(left: List[Int], right: List[Int]):
     def sorted: LocationIdLists = LocationIdLists(left.sortWith(_ - _ < 0), right.sortWith(_ - _ < 0))
-    def deltas: List[Int]       = left.zip(right).map((l, r) => Math.abs(l - r))
+    def deltas: List[Int]       = left.zip(right).map((l, r) => (l - r).abs)
     def simScore: Int           = left.map(item => right.count(_ == item) * item).sum
 
   object LocationIdLists:
