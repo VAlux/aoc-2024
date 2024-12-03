@@ -10,8 +10,10 @@ object d2p1 extends Solution[Int]:
     def fromDelta(delta: Int): Direction =
       if delta < 0 then Direction.DOWN else Direction.UP
 
-  case class ReportSafetyIndicator(direction: Direction, monotonic: Boolean, safeDelta: Boolean):
-    def ingestSignalChunk(chunk: List[Int]): ReportSafetyIndicator =
+  case class SafetyIndicator(direction: Direction, monotonic: Boolean, safeDelta: Boolean):
+    val isSafe = this.monotonic && this.safeDelta
+
+    def ingestSignalChunk(chunk: List[Int]): SafetyIndicator =
       val delta = chunk match
         case a :: b :: Nil => a - b
         case _             => 0
@@ -19,30 +21,31 @@ object d2p1 extends Solution[Int]:
       val absDelta = delta.abs
       this.and(Direction.fromDelta(delta), absDelta >= 1 && absDelta <= 3)
 
-    def and(currentDirection: Direction, safeDelta: Boolean): ReportSafetyIndicator =
-      ReportSafetyIndicator(
+    def and(currentDirection: Direction, safeDelta: Boolean): SafetyIndicator =
+      SafetyIndicator(
         currentDirection,
-        ReportSafetyIndicator.isMonotonicDirection(this, currentDirection),
+        SafetyIndicator.isMonotonicDirection(this, currentDirection),
         this.safeDelta && safeDelta
       )
 
-    def isSafe = this.monotonic && this.safeDelta
-
-  object ReportSafetyIndicator:
-    def isMonotonicDirection(indicator: ReportSafetyIndicator, direction: Direction): Boolean =
+  object SafetyIndicator:
+    def isMonotonicDirection(indicator: SafetyIndicator, direction: Direction): Boolean =
       indicator.direction == Direction.NOWHERE || (indicator.monotonic && (indicator.direction == direction))
 
-    val safe = ReportSafetyIndicator(Direction.NOWHERE, true, true)
+    val safe   = SafetyIndicator(Direction.NOWHERE, true, true)
+    val unsafe = SafetyIndicator(Direction.NOWHERE, false, false)
 
   def parseReports(input: List[String]): List[List[Int]] =
     def parseReport(report: String): List[Int] = report.split(" ").map(_.toInt).toList
     input.map(parseReport)
 
   def isSafe(report: List[Int]): Boolean =
-    report
-      .sliding(2, 1)
-      .foldLeft(ReportSafetyIndicator.safe)((indicator, chunk) => indicator.ingestSignalChunk(chunk))
-      .isSafe
+    def ingestSignalChunk(indicator: SafetyIndicator, chunk: List[Int]): SafetyIndicator =
+      if indicator.isSafe
+      then indicator.ingestSignalChunk(chunk)
+      else SafetyIndicator.unsafe
+
+    report.sliding(2, 1).foldLeft(SafetyIndicator.safe)(ingestSignalChunk).isSafe
 
   override def solve(input: List[String]): Int =
     parseReports(input).count(isSafe)
