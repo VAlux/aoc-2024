@@ -36,3 +36,5 @@ where `X` is a number of the day.
 
 `sbt run main 1` will run `dXp1.scala` against the `input.txt` data
 `sbt run main 2` will run `dXp2.scala` against the `input.txt` data
+
+`sbt run` will run all of the commands above
