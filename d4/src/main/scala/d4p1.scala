@@ -1,6 +1,8 @@
 import scala.annotation.static
 
 object d4p1 extends Solution[Int]:
+  val xmasRay = List('X', 'M', 'A', 'S')
+
   case class Coord(row: Int, column: Int):
     def offset(delta: Int): Coord       = Coord(row + delta, column + delta)
     def offset(dr: Int, dc: Int): Coord = Coord(row + dr, column + dc)
@@ -32,8 +34,9 @@ object d4p1 extends Solution[Int]:
         .toList
 
   def checkStarIndexes(starIndexes: List[List[Coord]], input: List[Array[Char]]): Int =
-    val xmasRay = List('X', 'M', 'A', 'S')
-    starIndexes.map(starRay => starRay.map(coord => input(coord.row)(coord.column))).count(_ == xmasRay)
+    starIndexes
+      .map(starRay => starRay.map(coord => input(coord.row)(coord.column)))
+      .count(_ == xmasRay)
 
   override def solve(input: List[String]): Int =
     locateAllCenters(input)
