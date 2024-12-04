@@ -1,4 +1,5 @@
 import scala.annotation.static
+
 object d4p1 extends Solution[Int]:
   case class Coord(row: Int, column: Int):
     def offset(delta: Int): Coord       = Coord(row + delta, column + delta)
