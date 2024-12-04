@@ -19,7 +19,11 @@ object d3p1 extends Solution[Int]:
       case "do()"    => Instruction(Operation.DO, List.empty)
       case "don't()" => Instruction(Operation.DONT, List.empty)
       case _         =>
-        val operands = input.substring(input.indexOf("(") + 1, input.indexOf(")")).split(",").toList
+        val operands = input
+          .substring(input.indexOf("(") + 1, input.indexOf(")"))
+          .split(",")
+          .toList
+
         Instruction(Operation.MUL, operands)
 
   @tailrec
