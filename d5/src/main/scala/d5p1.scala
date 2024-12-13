@@ -35,9 +35,10 @@ object d5p1 extends Solution[Int]:
     def check(currentPage: Int, nextPages: List[Int], res: Boolean = true): Boolean =
       if nextPages.isEmpty || !res then res
       else
-        val directValid  = checkRules(directRules, currentPage, nextPages, false)
-        val inverseValid = checkRules(inverseRules, currentPage, nextPages, true)
-        check(nextPages.head, nextPages.tail, directValid && inverseValid)
+        val valid = checkRules(directRules, currentPage, nextPages, false)
+          && checkRules(inverseRules, currentPage, nextPages, true)
+
+        check(nextPages.head, nextPages.tail, valid)
 
     check(order.pages.head, order.pages.tail)
 
