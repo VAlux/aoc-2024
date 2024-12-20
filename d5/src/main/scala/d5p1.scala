@@ -1,6 +1,8 @@
 import scala.util.chaining.*
 
 object d5p1 extends Solution[Int]:
+  type RuleMapping = Map[Int, Rule]
+
   case class Order(left: Int, right: Int):
     def swap(): Order = Order(right, left)
 
@@ -14,7 +16,7 @@ object d5p1 extends Solution[Int]:
       .map:
         case Array(l, r) => Order(l.toInt, r.toInt)
 
-  def groupOrdersToRules(orders: List[Order], inverse: Boolean): Map[Int, Rule] =
+  def groupOrdersToRules(orders: List[Order], inverse: Boolean): RuleMapping =
     orders
       .groupBy(_.left)
       .map { case (start, orders) => start -> Rule(start, orders.map(_.right).toSet, inverse) }
@@ -22,11 +24,11 @@ object d5p1 extends Solution[Int]:
   def parsePrints(input: List[String]): List[PrintOrder] =
     input.map(_.split(",").map(_.toInt).toList).map(PrintOrder.apply)
 
-  def isValidPrintOrder(order: PrintOrder, directRules: Map[Int, Rule], inverseRules: Map[Int, Rule]): Boolean =
+  def isValidPrintOrder(order: PrintOrder, directRules: RuleMapping, inverseRules: RuleMapping): Boolean =
     def isPageValid(page: List[Int], rule: Rule, inverse: Boolean): Boolean =
       if inverse then !page.exists(rule.next.contains) else page.forall(rule.next.contains)
 
-    def checkRules(rules: Map[Int, Rule], current: Int, next: List[Int], inverse: Boolean): Boolean =
+    def checkRules(rules: RuleMapping, current: Int, next: List[Int], inverse: Boolean): Boolean =
       rules
         .get(current)
         .map(rule => isPageValid(next, rule, inverse))
