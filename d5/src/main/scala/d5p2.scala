@@ -23,16 +23,29 @@ object d5p2 extends Solution[Int]:
         val nextBefore = leaveBefore ++ moveBefore
         val nextAfter  = moveAfter ++ leaveAfter
         val next       = if index > 0 then (nextBefore :+ number) ++ nextAfter else nextBefore ++ nextAfter
-        println(s"STEP $index")
-        println(s"SPAN AT: ${order.pages(index)}")
-        println(s"BEFORE $before AFTER: $after")
-        println(s"NEXT BEFORE $nextBefore NEXT AFTER: $nextAfter")
-        println(s"RES: $next")
-        println("=" * 20)
+
         go(next, index + 1)
 
     val res = go(order.pages)
     PrintOrder(res)
+
+  object TopologicalSorting:
+    def getRoot(graph: RuleMapping): Option[Int] =
+      val descendants = graph.values.flatMap(_.next).toSet
+      graph.keySet.diff(descendants).headOption
+
+    def sort(order: PrintOrder, root: Int, graph: RuleMapping): List[Int] =
+      val orderItems = order.pages.toSet
+
+      def bfs(current: Int, descendants: Set[Int], acc: List[Int] = List.empty): List[Int] =
+        if descendants.isEmpty then acc
+        else
+          val newCurrent     = descendants.head
+          val newDescendants = descendants.tail ++ graph.get(newCurrent).map(_.next).getOrElse(Set())
+          bfs(newCurrent, newDescendants, acc ++ orderItems.intersect(descendants))
+
+      val initial = if orderItems.contains(root) then List(root) else List.empty
+      bfs(root, graph(root).next, initial)
 
   override def solve(input: List[String]): Int =
     val (rules, orders) = input.splitAt(input.indexOf(""))
@@ -43,12 +56,7 @@ object d5p2 extends Solution[Int]:
     val invalidPrintOrders = parsePrints(orders.tail)
       .filterNot(order => isValidPrintOrder(order, directRules, inverseRules))
 
-    println(invalidPrintOrders)
-
-    println(s"INVALID ORDER: ${invalidPrintOrders(2)}")
-    println(s"CORRECTED ORDER: ${correctOrder(invalidPrintOrders(2), directRules, inverseRules)}")
-
-    // val correctedOrders = invalidPrintOrders.map(correctOrder(_, directRules, inverseRules))
-    // println(correctedOrders)
-    // correctedOrders.map(_.middle()).sum
+    val root = TopologicalSorting.getRoot(directRules)
+    val res  = TopologicalSorting.sort(invalidPrintOrders(0), root.get, directRules)
+    println(s"INVALID: ${invalidPrintOrders(0)} VALID: ${res}")
     0
